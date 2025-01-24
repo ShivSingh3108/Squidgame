@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQUID GAME</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+   
+    const npcArray = [];
+    let score = 0;
+    let gameOver = false;
+
+    
+    const npcImage = new Image();
+    npcImage.src = "https://tr.rbxcdn.com/180DAY-55108ebdb8776b59ef32c898ca80c10b/420/420/Hat/Png/noFilter";
+
+    const backgroundImage = new Image();
+    backgroundImage.src = "https://img.uhdpaper.com/image-0/d/thumbnail/squid-game-mask-pink-soldiers-4k--20.0_d.jpg"; 
+
+    
+
+    
+    function drawBackground() {
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+    }
+
+    
+    class NPC {
+        constructor(x, y, speed) {
+            this.x = x;
+            this.y = y;
+            this.size = 150;
+            this.speed = speed;
+        }
+
+        
+    draw() {
+        
+        ctx.shadowBlur = 200; 
+        ctx.shadowColor = "white"; 
+        ctx.shadowOffsetX = 5;
+        ctx.shadowOffsetY = 5; 
+ 
+        ctx.drawImage(npcImage, this.x, this.y, this.size, this.size);
+
+        
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+    
+    }
+        update() {
+            this.y += this.speed;
+            if (this.y + this.size >= canvas.height - 50) {
+                gameOver = true; }
+                 }   
+            }
+         
+    
+
+
+    function spawnNPC() {
+        const x = Math.random() * (canvas.width - 50);
+        const speed = Math.random() * 3 + 2;
+        npcArray.push(new NPC(x, -50, speed));
+    }
+
+
+    function drawLine() {
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, canvas.height - 50, canvas.width, 5);
+    }
+
+    
+    function drawScore() {
+        ctx.fillStyle = "White";
+        ctx.font = "30px Impact";
+        ctx.shadowColor="red";
+        ctx.shadowBlur="200";
+        ctx.fillText(`Score: ${score}`, 20, 30);
+    }
+
+  
+    function drawGameOver() {
+        ctx.fillStyle = "white";
+        ctx.font = "40px Typewriter, centre";
+        
+        ctx.fillText("Game Over! Reload the page to play again. 000-012-43X", canvas.width / 5.5, canvas.height / 2);
+    }
+
+
+    canvas.addEventListener("click", (event) => {
+        if (gameOver) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left;
+        const mouseY = event.clientY - rect.top;
+
+        npcArray.forEach((npc, index) => {
+            if (
+                mouseX >= npc.x &&
+                mouseX <= npc.x + npc.size &&
+                mouseY >= npc.y &&
+                mouseY <= npc.y + npc.size
+            ) {
+                npcArray.splice(index, 1); 
+                score++;
+            }
+        });
+    });
+
+   
+    function gameLoop() {
+        if (gameOver) {
+            drawGameOver();
+            return;
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBackground();
+       
+        drawLine();
+        npcArray.forEach((npc) => {
+            npc.update();
+            npc.draw();
+        });
+        drawScore();
+        requestAnimationFrame(gameLoop);
+    }
+
+
+    backgroundImage.onload = () => {
+        
+            setInterval(spawnNPC, 1000); 
+            gameLoop();
+        };
+
+    backgroundImage.onerror = () => alert("Background image failed to load.");
+    
+</script>
+</body>
+</html>
+
+
